@@ -1,0 +1,20 @@
+---
+- name: Install gvim
+  yum:
+    name: gvim
+    state: present
+
+- name: Create symlink from vim to vimx
+  file:
+    src: /usr/bin/vimx
+    dest: /usr/bin/vim
+    state: link
+    force: yes
+
+- name: Create symlink from vi to vimx
+  file:
+    src: /usr/bin/vimx
+    dest: /usr/bin/vi
+    state: link
+    force: yes
+
