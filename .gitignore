@@ -1,0 +1,9 @@
+# Ignore everything in Ansible config directory (and subdirectories)
+/ansible/config/
+
+# Ignore everything in Ansible inventories directory (and subdirectories)
+/ansible/inventories
+
+# Ignore Ansible temporary files *.retry
+*.retry
+
