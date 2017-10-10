@@ -1,0 +1,9 @@
+---
+config_git_user_email: "user@example.com"
+config_git_user_name: "Joe Bloggs"
+# No trailing slash in config_dir
+config_dir: ../../config
+config_github_keys_dir: "{{ config_dir }}/files/ssh"
+config_github_private_key: github
+config_github_public_key: github.pub
+

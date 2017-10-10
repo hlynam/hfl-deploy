@@ -1,0 +1,45 @@
+---
+- name: Install git
+  yum:
+    name: git
+    state: present
+
+- name: Set git user.email
+  git_config:
+    name: user.email
+    scope: global
+    value: "{{ role_git_configure_user_email }}"
+
+- name: Set git user.name
+  git_config:
+    name: user.name
+    scope: global
+    value: "{{ role_git_configure_user_name }}"
+
+- name: Copy github ssh private key to ~/.ssh
+  copy:
+    src: "{{ role_git_configure_github_keys_dir }}/{{ role_git_configure_github_private_key }}"
+    dest: ~/.ssh 
+    # mode is important as otherwise ssh will reject the key
+    mode: 0600
+
+- name: Copy github ssh public key to ~/.ssh
+  copy:
+    src: "{{ role_git_configure_github_keys_dir }}/{{ role_git_configure_github_public_key }}"
+    dest: ~/.ssh 
+    mode: 0600
+
+- name: Ensure ssh config file exists
+  copy:
+    content: ""
+    dest: ~/.ssh/config
+    force: no
+    mode: 0600
+
+- name: Add github keys to ssh config file
+  blockinfile:
+    path: ~/.ssh/config
+    block: |
+      Host github.com
+        IdentityFile ~/.ssh/{{ role_git_configure_github_private_key }}
+

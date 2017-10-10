@@ -4,8 +4,8 @@
 set -u
 
 
-# Add to sudo
-function add_to_sudo() {
+# Add user to sudo
+function add_user_to_sudo() {
 	echo
 	echo "*** Adding user to sudo"
 	echo
@@ -25,51 +25,6 @@ function add_to_sudo() {
 	shutdown -r now
 	exit 0
 }
-
-# Set Git email
-function set_git_email() {
-	echo
-	echo "*** Setting git user email"
-	echo
-	gitUserEmail=$(git config --global user.email)
-	if [ -n "$gitUserEmail" ]; then
-		echo "Git user email already set to $gitUserEmail"
-		return 0
-	fi
-		
-	gitUserEmail=''
-	read -p 'Enter git user email: ' gitUserEmail
-	if [ -z "$gitUserEmail" ]; then
-		echo "Not setting git user email"
-		return 0
-	fi
-		
-	echo "Setting git user email to $gitUserEmail"
-	git config --global user.email "$gitUserEmail"
-}
-
-# Set Git name
-function set_git_name() {
-	echo
-	echo "*** Setting git user name"
-	echo
-	gitUserName=$(git config --global user.name)
-	if [ -n "$gitUserName" ]; then
-		echo "Git user name already set to $gitUserName"
-		return 0
-	fi
-		
-	gitUserName=''
-	read -p 'Enter git user name: ' gitUserName
-	if [ -z "$gitUserName" ]; then
-		echo "Not setting git user name"
-		return 0
-	fi
-		
-	echo "Setting git user name to $gitUserName"
-	git config --global user.name "$gitUserName"
-}
-
 
 # Prompt to continue
 # http://stackoverflow.com/questions/3231804/in-bash-how-to-add-are-you-sure-y-n-to-any-command-or-alias
@@ -135,59 +90,9 @@ function check_ansible() {
 	fi
 }
 
-# Create ssh keypair
-function create_ssh_keypair() {
-	echo
-	echo '*** Create ssh keypair'
-	echo
-	sshPrivateKey="$HOME/.ssh/id_rsa"
-	if [ -f "$sshPrivateKey" ]; then
-		echo "Ssh private key $sshPrivateKey exists"
-		return 0
-	fi
-
-	ssh-keygen
-	authorizedKeys="$HOME/.ssh/authorized_keys"
-	rm -f "$authorizedKeys"
-}
-
-function copy_ssh_keypair() {
-	echo
-	echo '*** Copy ssh keypair to localhost'
-	echo
-	sshPrivateKey="$HOME/.ssh/id_rsa"
-	ssh-copy-id -i "$sshPrivateKey" localhost
-}
-
-function add_localhost_to_ansible() {
-	echo
-	echo '*** Add localhost to ansible hosts file'
-	echo
-	ansibleHosts='/etc/ansible/hosts'
-	localhostEntry='localhost'
-	# http://stackoverflow.com/questions/3557037/appending-a-line-to-a-file-only-if-it-does-not-already-exist
-	if ! grep -q -E "^$localhostEntry" "$ansibleHosts" ; then
-		# http://stackoverflow.com/questions/82256/how-do-i-use-sudo-to-redirect-output-to-a-location-i-dont-have-permission-to-wr
-		echo "$localhostEntry" | sudo tee -a "$ansibleHosts" > /dev/null
-	fi
-}
-
-function run_ansible_ping() {
-	echo
-	echo '*** Run ansible ping'
-	echo
-	ansible all -m ping
-}
-
-add_to_sudo
-set_git_email
-set_git_name
+add_user_to_sudo
 turn_off_automatic_updates
 install_epel_repo
 install_ansible
 check_ansible
-create_ssh_keypair
-copy_ssh_keypair
-add_localhost_to_ansible
-run_ansible_ping
 
