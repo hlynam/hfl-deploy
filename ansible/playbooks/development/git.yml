@@ -1,5 +1,5 @@
 ---
-- hosts: "{{ config_groups }}"
+- hosts: "{{ config_groups | default('development-core') }}"
   roles:
     - role: git-configure
       role_git_configure_user_email: "{{ config_git_user_email }}"
