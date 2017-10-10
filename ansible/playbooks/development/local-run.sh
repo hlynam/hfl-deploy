@@ -6,5 +6,5 @@ if [ $# -eq 0 ]; then
 	exit 1
 fi
 
-ansible-playbook --inventory "localhost," --connection local "$@"
+ansible-playbook -e 'config_groups=local' "$@"
 
