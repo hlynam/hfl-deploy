@@ -1,0 +1,21 @@
+---
+- name: Print module variables
+  debug:
+    msg: "{{ vars }}"
+
+- name: Print environment variables
+  debug:
+    msg: "{{ environment }}"
+
+- name: Print group names
+  debug:
+    msg: "{{ group_names }}"
+
+- name: Print group variables
+  debug:
+    msg: "{{ groups }}"
+
+- name: Print host variables
+  debug:
+    msg: "{{ hostvars }}"
+
