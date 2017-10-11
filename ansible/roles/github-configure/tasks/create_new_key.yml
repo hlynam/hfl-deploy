@@ -12,6 +12,16 @@
     state: directory
     mode: 0700
 
+- name: Delete ssh public key if it exists
+  file:
+    path: "{{ role_github_configure_github_keys_dir }}/{{ github_public_key }}"
+    state: absent
+
+- name: Delete ssh private key if it exists
+  file:
+    path: "{{ role_github_configure_github_keys_dir }}/{{ github_private_key }}"
+    state: absent
+
 - name: Generate ssh keys (public and private)
   shell: "ssh-keygen -t rsa -b 4096 -P '' -C {{ role_github_configure_user_email }} -f '{{ role_github_configure_github_keys_dir }}/{{ github_private_key }}'"
 
