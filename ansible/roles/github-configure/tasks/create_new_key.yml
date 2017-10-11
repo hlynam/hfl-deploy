@@ -1,0 +1,63 @@
+- name: Get datetime
+  set_fact:
+    current_date: "{{ lookup('pipe', 'date +%Y_%m_%d__%H_%M_%S') }}"
+
+- name: Create ssh key title from date
+  set_fact:
+    github_key_title: "{{ current_date }}"
+
+- name: Create ssh keys directory
+  file:
+    path: "{{ role_github_configure_github_keys_dir }}"
+    state: directory
+    mode: 0700
+
+- name: Generate ssh keys (public and private)
+  shell: "ssh-keygen -t rsa -b 4096 -P '' -C {{ role_github_configure_user_email }} -f '{{ role_github_configure_github_keys_dir }}/{{ github_private_key }}'"
+
+- name: Load ssh public key into variable
+  shell: "cat {{ role_github_configure_github_keys_dir }}/{{ github_public_key }}"
+  register: ssh_public_key
+
+- name: Upload ssh public key to github for this user
+  uri:
+    url: https://api.github.com/user/keys
+    user: "{{ role_github_configure_github_account }}"
+    method: POST
+    status_code: 201
+    body_format: json
+    body:
+      read_only: true
+      title: "{{ github_key_title }}"
+      key: "{{ ssh_public_key.stdout }}"
+    headers:
+      Content-Type: application/json
+      Authorization: "token {{ role_github_configure_github_personal_access_token }}"
+
+- name: Copy github ssh private key to ~/.ssh
+  copy:
+    src: "{{ role_github_configure_github_keys_dir }}/{{ github_private_key }}"
+    dest: ~/.ssh 
+    # mode is important as otherwise ssh will reject the key
+    mode: 0600
+
+- name: Copy github ssh public key to ~/.ssh
+  copy:
+    src: "{{ role_github_configure_github_keys_dir }}/{{ github_public_key }}"
+    dest: ~/.ssh 
+    mode: 0600
+
+- name: Ensure ssh config file exists
+  copy:
+    content: ""
+    dest: ~/.ssh/config
+    force: no
+    mode: 0600
+
+- name: Add github keys to ssh config file
+  blockinfile:
+    path: ~/.ssh/config
+    block: |
+      Host github.com
+        IdentityFile ~/.ssh/{{ github_private_key }}
+

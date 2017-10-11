@@ -1,0 +1,9 @@
+---
+- hosts: "{{ config_groups | default('development-core') }}"
+  roles:
+    - role: github-configure
+      role_github_configure_user_email: "{{ config_git_user_email }}"
+      role_github_configure_github_keys_dir: "{{ config_github_keys_dir }}"
+      role_github_configure_github_account: "{{ config_github_account }}"
+      role_github_configure_github_personal_access_token: "{{ config_github_personal_access_token }}"
+

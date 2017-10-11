@@ -1,0 +1,14 @@
+- name: Define ssh key filenames
+  set_fact:
+    github_private_key: "github"
+    github_public_key: "github.pub"
+
+- name: Check if ssh private key exists
+  stat:
+    path: "{{ role_github_configure_github_keys_dir }}/{{ github_private_key }}"
+  register: stat_result
+
+- include: create_new_key.yml
+  when: stat_result.stat.exists == false
+
+
