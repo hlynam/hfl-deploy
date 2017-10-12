@@ -6,5 +6,7 @@ if [ $# -eq 0 ]; then
 	exit 1
 fi
 
-ansible-playbook -e 'config_groups=local' "$@"
+# -K: ask for sudo password
+# -e: supply a variable to the script to let it know we will override the groups
+ansible-playbook -K -e 'config_groups=local' "$@"
 
