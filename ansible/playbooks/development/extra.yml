@@ -1,0 +1,8 @@
+---
+- hosts: "{{ config_groups | default('development-extra') }}"
+  become: yes
+  roles:
+    - php7-install
+    - docker-install
+    - ansible-container-install
+

@@ -3,19 +3,14 @@
   become: yes
   roles:
     - vim-install
+    - tmux-install
     - yum-update
     - xfce-install
-
-- hosts: "{{ config_groups | default('development-extra') }}"
-  become: yes
-  roles:
-    - php7-install
-    - docker-install
-    - ansible-container-install
 
 - hosts: "{{ config_groups | default('development-core') }}"
   roles:
     - vim-yml
     - vim-configure
+    - tmux-configure
     - get-disk-space
 
