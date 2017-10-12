@@ -71,3 +71,10 @@
       Host github.com
         IdentityFile ~/.ssh/{{ github_private_key }}
 
+# See: https://gist.github.com/m14t/3056747
+- name: Change this repo from https to ssh
+  git_config:
+    name: url."git@github.com:".insteadOf
+    scope: local
+    repo: "{{ role_path }}"
+    value: "https://github.com/"
