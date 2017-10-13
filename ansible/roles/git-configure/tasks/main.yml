@@ -16,6 +16,12 @@
     scope: global
     value: "{{ role_git_configure_user_name }}"
 
+- name: Enable git colorized output
+  git_config:
+    name: color.ui
+    scope: global
+    value: auto
+
 - name: Configure user gitignore
   git_config:
     name: core.excludesfile
