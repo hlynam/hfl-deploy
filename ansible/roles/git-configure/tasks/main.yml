@@ -16,3 +16,14 @@
     scope: global
     value: "{{ role_git_configure_user_name }}"
 
+- name: Configure user gitignore
+  git_config:
+    name: core.excludesfile
+    scope: global
+    value: "{{ git_gitignore }}"
+
+- name: Copy user gitignore
+  copy:
+    src: files/gitignore
+    dest: "{{ git_gitignore }}"
+
