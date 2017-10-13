@@ -1,2 +1,11 @@
-git_gitignore: ~/.gitignore
+# We use ansible_env.HOME instead of ~ because
+# ansible will always expand ~ to remote user's
+# home directory and then _always_ mark the task
+# as changed because it (I think incorrectly) compares
+# the unexpanded variable name ~/.gitignore to the final
+# expand variable name (e.g. /home/tec/.gitignore) and says
+# that they are different.
+# Using {{ ansible_env.HOME }} avoids this problem 
+# http://docs.ansible.com/ansible/latest/faq.html
+git_gitignore: "{{ ansible_env.HOME }}/.gitignore"
 
