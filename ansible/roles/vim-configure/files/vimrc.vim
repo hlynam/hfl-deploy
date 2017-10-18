@@ -55,51 +55,19 @@ endif
 " based on the files open in vim
 " Check that we are running under tmux ($TERM begins with 'screen')
 if &term =~# "^screen"
-	function! TmuxUserHasManuallySetWindowName()
-		let currentWindowName = substitute(system("tmux display-message -p '#W'"), '\n$', '', '')
-		"call system('echo Line: ' . currentWindowName . ' >> ~/debug.txt')
-		if (currentWindowName !~# '^vim$') && (currentWindowName !~# '^new-window$') && (currentWindowName !~# ': vim$')
-			" User has manually set tmux window title, so don't change it
-			return 1
-		endif
-		return 0
-	endfunction
-
 	function! TmuxSetWindowName()
-		" call system('date >> ~/debug.txt; echo TmuxSetWindowName >> ~/debug.txt')
+		" Identify only the buffers created by the user
+		let bufferList = map(filter(range(0, bufnr('$')), 'bufwinnr(v:val)>=0 && bufloaded(v:val) && bufexists(v:val)'), 'bufname(v:val)')
 
-		if TmuxUserHasManuallySetWindowName()
-			return
-		endif
-
-		" https://stackoverflow.com/questions/2974192/how-can-i-pare-down-vims-buffer-list-to-only-include-active-buffers
-		let bufferList = {}
-		for t in range(1, tabpagenr('$'))
-			for b in tabpagebuflist(t)
-				let bufName = bufname(b)
-
-				if (bufName != '')
-					let bufName = substitute(bufName, '/$', '', '')
-					let bufferList[b] = substitute(bufName, '.*/', '', '')
-				endif
-			endfor
-		endfor
-
-		if empty(bufferList)
-			call TmuxResetWindowName()
+		if len(bufferList) > 0
+			call system("~/src/tools/tmux/tmux-set-window-name.pl", join(bufferList, "\n"))
 		else
-			let windowName = join(values(bufferList), "; ") . ': vim'
-
-			call system("tmux rename-window " . shellescape(windowName))
+			call TmuxResetWindowName()
 		endif
 	endfunction
 
 	function! TmuxResetWindowName()
-		if TmuxUserHasManuallySetWindowName()
-			return
-		endif
-
-		call system("tmux rename-window vim")
+		call system("~/src/tools/tmux/tmux-set-window-name.pl")
 	endfunction
 
 	augroup augroup_tmux
