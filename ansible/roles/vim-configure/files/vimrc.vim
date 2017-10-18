@@ -93,3 +93,14 @@ nnoremap <space>y :let @+=expand('%:p')<cr>
 nnoremap <space>v :<c-u>v//d_<cr>
 nnoremap <space>g :<c-u>g//d_<cr>
 
+" Allow * and # to work in visual mode
+" https://github.com/nelstrom/vim-visual-star-search/blob/master/plugin/visual-star-search.vim
+function! s:VSetSearch(cmdtype)
+  let temp = @s
+  norm! gv"sy
+  let @/ = '\V' . substitute(escape(@s, a:cmdtype.'\'), '\n', '\\n', 'g')
+  let @s = temp
+endfunction
+xnoremap * :<C-u>call <SID>VSetSearch('/')<CR>/<C-R>=@/<CR><CR>
+xnoremap # :<C-u>call <SID>VSetSearch('?')<CR>?<C-R>=@/<CR><CR>
+
