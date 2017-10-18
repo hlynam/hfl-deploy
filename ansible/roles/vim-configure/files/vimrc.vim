@@ -84,3 +84,7 @@ if &term =~# "^screen"
 	augroup END
 endif
 
+" Copy full path of current filename to clipboard register
+" http://stackoverflow.com/questions/2233905/how-can-i-expand-the-full-path-of-the-current-file-to-pass-to-a-command-in-vim
+nnoremap <space>y :let @+=expand('%:p')<cr>
+
