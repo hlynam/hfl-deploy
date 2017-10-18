@@ -24,10 +24,6 @@ s;.*/;; for (my @filenames = (<>));
 # Remove trailing newlines
 chomp @filenames;
 
-# Remove empty string filenames
-# http://www.perlmonks.org/?node_id=124970
-@filenames = grep { $_ ne '' } @filenames;
-
 # Remove duplicates
 # https://perlmaven.com/unique-values-in-an-array-in-perl
 my @unique = do { my %seen; grep { !$seen{$_}++ } @filenames };

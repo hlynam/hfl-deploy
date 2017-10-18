@@ -57,7 +57,7 @@ endif
 if &term =~# "^screen"
 	function! TmuxSetWindowName()
 		" Identify only the buffers created by the user
-		let bufferList = map(filter(range(0, bufnr('$')), 'bufwinnr(v:val)>=0 && bufloaded(v:val) && bufexists(v:val)'), 'bufname(v:val)')
+		let bufferList = map(filter(range(0, bufnr('$')), '(bufname(v:val) != "") && bufwinnr(v:val)>=0 && bufloaded(v:val) && bufexists(v:val)'), 'bufname(v:val)')
 
 		if len(bufferList) > 0
 			call system("~/src/tools/tmux/tmux-set-window-name.pl", join(bufferList, "\n"))
