@@ -88,3 +88,8 @@ endif
 " http://stackoverflow.com/questions/2233905/how-can-i-expand-the-full-path-of-the-current-file-to-pass-to-a-command-in-vim
 nnoremap <space>y :let @+=expand('%:p')<cr>
 
+" If you delete a lot of lines, this can be quite slow
+" d_ does not use the copy buffer and is quicker
+nnoremap <space>v :<c-u>v//d_<cr>
+nnoremap <space>g :<c-u>g//d_<cr>
+
