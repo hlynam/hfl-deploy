@@ -55,19 +55,58 @@ endif
 " based on the files open in vim
 " Check that we are running under tmux ($TERM begins with 'screen')
 if &term =~# "^screen"
-	function! TmuxSetWindowName()
-		" Identify only the buffers created by the user
-		let bufferList = map(filter(range(0, bufnr('$')), '(bufname(v:val) != "") && bufwinnr(v:val)>=0 && bufloaded(v:val) && bufexists(v:val)'), 'bufname(v:val)')
+	function! TmuxUserHasManuallySetWindowName()
+		let l:currentWindowName = substitute(system("tmux display-message -p '#W'"), '\n$', '', '')
+		"call system('echo Line: ' . shellescape(l:currentWindowName) . ' >> ~/vim-debug.txt')
+		if (l:currentWindowName !~# '^vim$') && (l:currentWindowName !~# '^new-window$') && (l:currentWindowName !~# ': vim$')
+			" User has manually set tmux window title, so don't change it
+			return 1
+		endif
+		return 0
+	endfunction
 
-		if len(bufferList) > 0
-			call system("~/src/tools/tmux/tmux-set-window-name.pl", join(bufferList, "\n"))
+	function! TmuxSetWindowName()
+		" Try and identify only the buffers created by the user
+		" https://devhints.io/vimscript-functions
+		let l:bufferList = map(filter(range(0, bufnr('$')), 'bufwinnr(v:val)>=0 && bufloaded(v:val) && bufexists(v:val) && bufname(v:val) != ""'), 'substitute(bufname(v:val), ".*/", "", "")')
+
+		" Remove duplicates
+		let l:bufferList = filter(l:bufferList, 'count(l:bufferList, v:val) == 1')
+
+		if len(l:bufferList) > 0
+			" Sort list so that g:cachedWindowList doesn't change
+			" if filename list hasn't changed
+			call sort(l:bufferList)
+
+			let l:windowName = join(l:bufferList, "; ") . ': vim'
+			" call system('echo List: ' . shellescape(l:windowList) . ' >> ~/vim-debug.txt')
+
+			" Cache window title as 'call system()' can take a long time
+			" compared with standard vimscript statements
+			if exists("g:cachedWindowList")
+				if g:cachedWindowList ==# l:windowName
+					" call system('echo Match: ' . shellescape(l:windowName) . ' >> ~/vim-debug.txt')
+					return
+				endif
+			endif
+			let g:cachedWindowList = l:windowName
+
+			if TmuxUserHasManuallySetWindowName()
+				return
+			endif
+
+			call system("tmux rename-window " . shellescape(l:windowName))
 		else
 			call TmuxResetWindowName()
 		endif
 	endfunction
 
 	function! TmuxResetWindowName()
-		call system("~/src/tools/tmux/tmux-set-window-name.pl")
+		if TmuxUserHasManuallySetWindowName()
+			return
+		endif
+
+		call system("tmux rename-window vim")
 	endfunction
 
 	augroup augroup_tmux
@@ -78,6 +117,7 @@ if &term =~# "^screen"
 
 		" Handle normal buffers
 		autocmd FileReadPost,BufReadPost,BufNewFile,BufEnter * call TmuxSetWindowName()
+		"autocmd BufEnter * call TmuxSetWindowName()
 
 		" Clear tmux window name on exit
 		autocmd VimLeave * call TmuxResetWindowName()

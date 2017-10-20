@@ -1,15 +1,4 @@
 ---
-- name: Create directory
-  file:
-    path: "~/src/tools/tmux"
-    state: directory
-
-- name: Copy tmux utilities
-  copy:
-    src: files/tmux-set-window-name.pl
-    dest: ~/src/tools/tmux/tmux-set-window-name.pl
-    mode: 0774
-
 - name: Copy vimrc
   copy:
     src: files/vimrc.vim
