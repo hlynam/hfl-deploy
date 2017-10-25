@@ -1,0 +1,28 @@
+---
+- name: Define local variables
+  set_fact:
+    local_neomutt_install_clone_external_dir: "{{ ansible_env.HOME }}/{{ role_neomutt_install_clone_external_dir }}"
+    # './configure --prefix' needs an absolute path
+    local_neomutt_install_make_install_dir: "{{ ansible_env.HOME }}/{{ role_neomutt_install_make_install_dir }}"
+
+- name: Check if neomutt is installed
+  shell: "cd {{ local_neomutt_install_make_install_dir }}/bin && ./neomutt-notmuch -v"
+  register: local_neomutt_install_installed
+  # Don't print an error message if neomutt is not installed
+  failed_when: false
+  # Instead show task as changed if neomutt is not installed
+  changed_when: local_neomutt_install_installed.rc != 0
+
+- include: make.yml
+  when: local_neomutt_install_installed.rc != 0
+
+- name: Get neomutt version
+  shell: "cd {{ local_neomutt_install_make_install_dir }}/bin && ./neomutt-notmuch -v"
+  changed_when: false
+  register: local_neomutt_install_version
+
+- name: Print neomutt version
+  debug:
+    var: local_neomutt_install_version.stdout
+
+

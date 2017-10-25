@@ -1,0 +1,101 @@
+---
+# Command line build steps
+# make clean
+# autoreconf -i --force
+# export LDFLAGS='-L/home/tec/usr/local/lib'
+# export CPPFLAGS='-I/home/tec/usr/local/include'
+# ./configure --prefix='/home/tec/usr/local' --enable-notmuch --with-kyotocabinet --with-ssl --with-sasl --with-gss
+# export LD_LIBRARY_PATH='/home/tec/usr/local/lib:$LD_LIBRARY_PATH'
+# make
+# make install
+
+# Dependencies
+# https://www.neomutt.org/distro/centos
+- name: Install neomutt dependencies
+  become: yes
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - gettext-devel
+    - ncurses-devel
+    - slang-devel
+    - docbook-dtds
+    - docbook-style-xsl
+
+# --with-sasl: Use SASL network security library
+    - cyrus-sasl-devel
+
+#    - gnutls-devel
+#    - gpgme-devel
+#    - krb5-devel
+#    - tokyocabinet-devel
+    - kyotocabinet-devel
+
+# --with-ssl: Enable TLS support using openssl
+    - openssl-devel
+
+# --with-bdb: Enable header cache with Berkeley DB
+    #- libdb-devel
+
+    - lynx
+    - w3m
+
+- name: Create git clone directory
+  file:
+    path: "{{ local_neomutt_install_clone_external_dir }}"
+    state: directory
+
+- name: Git clone neomutt
+  git:
+    repo: "https://github.com/neomutt/neomutt"
+    dest: "{{ local_neomutt_install_clone_external_dir }}/neomutt"
+    version: "{{ role_neomutt_install_version }}"
+
+- name: Build neomutt - make clean
+  shell: "make clean"
+  args:
+    chdir: "{{ local_neomutt_install_clone_external_dir }}/neomutt"
+
+- name: Build neomutt - autoreconf
+  # --force: rebuild all targets
+  shell: "autoreconf -i --force"
+  args:
+    chdir: "{{ local_neomutt_install_clone_external_dir }}/neomutt"
+
+# See:
+# https://www.neomutt.org/dev/build
+# --with-kyoto: Enable header cache with Kyoto Cabinet.
+# Berkeley DB (--with-bdb) doesn't work with --prefix
+# --with-ssl: Enable TLS support using openssl
+# --with-sasl: Use SASL network security library
+# --with-gss: Compile in GSSAPI authentication for IMAP
+- name: Build neomutt - configure
+  shell: "./configure --prefix='{{ local_neomutt_install_make_install_dir }}' --enable-notmuch --with-kyoto --with-ssl --with-sasl --with-gss"
+  args:
+    chdir: "{{ local_neomutt_install_clone_external_dir }}/neomutt"
+  environment:
+    # We need to specify the location of the notmuch lib and include
+    LDFLAGS: '-L{{ local_neomutt_install_make_install_dir }}/lib'
+    CPPFLAGS: '-I{{ local_neomutt_install_make_install_dir }}/include'
+
+- name: Build neomutt - make
+  shell: "make"
+  args:
+    chdir: "{{ local_neomutt_install_clone_external_dir }}/neomutt"
+  environment:
+    LD_LIBRARY_PATH: '{{ local_neomutt_install_make_install_dir }}/lib:{{ ansible_env.LD_LIBRARY_PATH }}'
+
+# This works without root because of --prefix option to ./configure
+- name: Build neomutt - make install
+  shell: "make install"
+  args:
+    chdir: "{{ local_neomutt_install_clone_external_dir }}/neomutt"
+
+- name: Create neomutt alias (neomutt-notmuch) with library path for notmuch
+  template:
+    src: files/neomutt.j2
+    dest: "{{ local_neomutt_install_make_install_dir }}/bin/neomutt-notmuch"
+    mode: 0755
+
+
