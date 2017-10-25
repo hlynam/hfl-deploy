@@ -1,0 +1,47 @@
+---
+# https://git.notmuchmail.org/git/notmuch/blob/HEAD:/INSTALL
+# https://notmuchmail.org/getting-started/#index2h2
+- name: Install notmuch dependencies
+  become: yes
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - xapian-core-devel
+    - gmime-devel
+    - libtalloc-devel
+    - zlib-devel
+
+- name: Create git clone directory
+  file:
+    path: "{{ local_notmuch_install_clone_external_dir }}"
+    state: directory
+
+- name: Git clone notmuch
+  git:
+    repo: "git://git.notmuchmail.org/git/notmuch"
+    dest: "{{ local_notmuch_install_clone_external_dir }}/notmuch"
+    version: "{{ role_notmuch_install_version }}"
+
+- name: Build notmuch - make clean
+  shell: "make clean"
+  args:
+    chdir: "{{ local_notmuch_install_clone_external_dir }}/notmuch"
+
+- name: Build notmuch - configure
+  shell: "./configure --prefix='{{ local_notmuch_install_make_install_dir }}'"
+  args:
+    chdir: "{{ local_notmuch_install_clone_external_dir }}/notmuch"
+
+- name: Build notmuch - make
+  shell: "make"
+  args:
+    chdir: "{{ local_notmuch_install_clone_external_dir }}/notmuch"
+
+# This works without root because of --prefix option to ./configure
+- name: Build notmuch - make install
+  shell: "make install"
+  args:
+    chdir: "{{ local_notmuch_install_clone_external_dir }}/notmuch"
+
+

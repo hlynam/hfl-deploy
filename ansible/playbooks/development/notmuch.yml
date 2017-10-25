@@ -1,0 +1,13 @@
+---
+- hosts: "{{ config_groups | default('development-email') }}"
+  roles:
+    #- role: debug-print-all
+    - role: make-install
+
+    - role: notmuch-install
+      role_notmuch_install_clone_external_dir: "{{ config_clone_external_dir }}"
+      role_notmuch_install_make_install_dir: "{{ config_make_install_dir }}"
+      role_notmuch_install_version: "{{ config_notmuch_version }}"
+
+
+

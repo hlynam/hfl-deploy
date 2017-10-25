@@ -1,0 +1,27 @@
+---
+- name: Define local variables
+  set_fact:
+    local_notmuch_install_clone_external_dir: "{{ ansible_env.HOME }}/{{ role_notmuch_install_clone_external_dir }}"
+    # './configure --prefix' needs an absolute path
+    local_notmuch_install_make_install_dir: "{{ ansible_env.HOME }}/{{ role_notmuch_install_make_install_dir }}"
+
+- name: Check if notmuch is installed
+  shell: "cd {{ local_notmuch_install_make_install_dir }}/bin && ./notmuch --version"
+  register: local_notmuch_install_installed
+  # Don't print an error message if notmuch is not installed
+  failed_when: false
+  # Instead show task as changed if notmuch is not installed
+  changed_when: local_notmuch_install_installed.rc != 0
+
+- include: make.yml
+  when: local_notmuch_install_installed.rc != 0
+
+- name: Get notmuch version
+  shell: "cd {{ local_notmuch_install_make_install_dir }}/bin && ./notmuch --version"
+  changed_when: false
+  register: local_notmuch_install_version
+
+- name: Print notmuch version
+  debug:
+    var: local_notmuch_install_version.stdout
+
