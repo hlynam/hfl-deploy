@@ -144,3 +144,10 @@ endfunction
 xnoremap * :<C-u>call <SID>VSetSearch('/')<CR>/<C-R>=@/<CR><CR>
 xnoremap # :<C-u>call <SID>VSetSearch('?')<CR>?<C-R>=@/<CR><CR>
 
+" Set filetype to mail when composing a message in neomutt
+" http://www.mdlerch.com/emailing-mutt-and-vim-advanced-config.html
+augroup mail_filetype
+    autocmd!
+    autocmd! VimEnter /tmp/neomutt* :set filetype=mail
+augroup END
+
